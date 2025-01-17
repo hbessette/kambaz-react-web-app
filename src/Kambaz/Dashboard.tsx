@@ -24,7 +24,7 @@ export default function Dashboard() {
         </div>
         <div className="wd-dashboard-course">
           <Link
-            to="/Kambaz/Courses/1234/Home"
+            to="/Kambaz/Courses/4520/Home"
             className="wd-dashboard-course-link"
           >
             <img src="/images/phone.jpg" width={200} />
@@ -39,7 +39,7 @@ export default function Dashboard() {
         </div>
         <div className="wd-dashboard-course">
           <Link
-            to="/Kambaz/Courses/1234/Home"
+            to="/Kambaz/Courses/3650/Home"
             className="wd-dashboard-course-link"
           >
             <img src="/images/laptop.jpg" width={200} />
@@ -54,7 +54,7 @@ export default function Dashboard() {
         </div>
         <div className="wd-dashboard-course">
           <Link
-            to="/Kambaz/Courses/1234/Home"
+            to="/Kambaz/Courses/1232/Home"
             className="wd-dashboard-course-link"
           >
             <img src="/images/city.jpg" width={200} />
@@ -69,7 +69,7 @@ export default function Dashboard() {
         </div>
         <div className="wd-dashboard-course">
           <Link
-            to="/Kambaz/Courses/1234/Home"
+            to="/Kambaz/Courses/3000/Home"
             className="wd-dashboard-course-link"
           >
             <img src="/images/data.jpg" width={200} />
@@ -84,7 +84,7 @@ export default function Dashboard() {
         </div>
         <div className="wd-dashboard-course">
           <Link
-            to="/Kambaz/Courses/1234/Home"
+            to="/Kambaz/Courses/3500/Home"
             className="wd-dashboard-course-link"
           >
             <img src="/images/java.jpg" width={200} />
@@ -99,7 +99,7 @@ export default function Dashboard() {
         </div>
         <div className="wd-dashboard-course">
           <Link
-            to="/Kambaz/Courses/1234/Home"
+            to="/Kambaz/Courses/3800/Home"
             className="wd-dashboard-course-link"
           >
             <img src="/images/computation.jpg" width={200} />
