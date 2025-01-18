@@ -1,13 +1,9 @@
+import ModulesControls from "./ModulesControls";
 
 export default function Modules() {
   return (
     <div>
-      <button>Collapse All</button>{" "}
-      <button>View Progress</button>{" "}
-      <select>
-        <option value="PUBLISH-ALL">Publish All</option>
-      </select>
-      <button>+ Module</button>
+      <ModulesControls/>
       <br />
       <ul id="wd-modules">
         <li className="wd-module">
