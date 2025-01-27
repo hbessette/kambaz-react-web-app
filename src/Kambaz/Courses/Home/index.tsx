@@ -9,8 +9,8 @@ export default function Home() {
           <Col xs={12} lg={9} className="mb-3 mb-lg-0">
             <Modules />
           </Col>
-          <Col lg={3} className="d-none d-lg-block">
-            <div className="position-sticky" style={{ top: "20px" }}>
+          <Col xs={0}  lg={3} className="d-none d-lg-block">
+            <div className="float-end" style={{ top: "20px" }}>
               <CourseStatus />
             </div>
           </Col>
