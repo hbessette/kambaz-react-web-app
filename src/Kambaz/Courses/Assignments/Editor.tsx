@@ -6,12 +6,17 @@ import {
   FormCheck,
   Button,
 } from "react-bootstrap";
+import * as db from "../../Database";
+import { Link, useParams } from "react-router";
 export default function AssignmentEditor() {
+  const assignments = db.assignments;
+  const { aid, cid } = useParams();
+  const assignment = assignments.find((a) => a._id === aid);
   return (
     <div id="wd-assignments-editor">
       <FormGroup controlId="wd-assignment-name" className="mb-3">
         <FormLabel>Assignment Name</FormLabel>
-        <FormControl type="text" value="A1" />
+        <FormControl type="text" value={assignment ? assignment.title : ""} />
       </FormGroup>
 
       <FormGroup controlId="wd-description">
@@ -126,8 +131,17 @@ export default function AssignmentEditor() {
       </FormGroup>
       <hr />
       <div className="d-flex justify-content-end align-items-center">
-        <Button id="wd-cancel" className="btn btn-secondary me-2">Cancel</Button>
-        <Button id="wd-save" className="btn btn-danger me-2">Save</Button>
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <Button id="wd-cancel" className="btn btn-secondary me-2">
+            Cancel
+          </Button>
+        </Link>
+
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <Button id="wd-save" className="btn btn-danger me-2">
+            Save
+          </Button>
+        </Link>
       </div>
     </div>
   );

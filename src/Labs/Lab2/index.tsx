@@ -93,7 +93,7 @@ export default function Lab2() {
       <Dimensions />
 
       <Positions />
-      
+
       <Zindex />
 
       <Float />
@@ -105,16 +105,17 @@ export default function Lab2() {
       <ReactIconsSamplers />
 
       <BootstrapGrids />
-      
+
       <ScreenSizeLabel />
-      
+
       <BootstrapTables />
-      
+
       <BootstrapLists />
-      
+
       <BootstrapForms />
 
-      <BootstrapNavigation/>
+      <BootstrapNavigation />
+      <div className="padding">Hello World!</div>
     </Container>
   );
 }

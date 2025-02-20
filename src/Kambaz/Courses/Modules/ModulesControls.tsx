@@ -4,7 +4,7 @@ import { Button, Dropdown } from "react-bootstrap";
 import { VscCircleSlash } from "react-icons/vsc";
 export default function ModulesControls() {
   return (
-    <div id="wd-modules-controls" className="text-nowrap">
+    <div id="wd-modules-controls" className="text-nowrap align-self-center">
       <Button
         variant="danger"
         size="lg"
