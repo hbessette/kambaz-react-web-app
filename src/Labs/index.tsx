@@ -3,6 +3,7 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import TOC from "./TOC/index.tsx";
 import Lab2 from "./Lab2/index.tsx";
 import Lab3 from "./Lab3/index.tsx";
+import Lab4 from "./Lab4/index.tsx";
 export default function Labs() {
   return (
     <div>
@@ -13,6 +14,7 @@ export default function Labs() {
         <Route path="Lab1" element={<Lab1 />} />
         <Route path="Lab2/*" element={<Lab2 />} />
         <Route path="Lab3/*" element={<Lab3 />} />
+        <Route path="Lab4/*" element={<Lab4 />} />
       </Routes>
     </div>
   );
