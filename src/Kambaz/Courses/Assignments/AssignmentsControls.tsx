@@ -1,11 +1,16 @@
 import { FaPlus } from "react-icons/fa6";
 import { Button } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router";
 export default function AssignmentsControls() {
+    const navigate = useNavigate();
+    const { cid } = useParams();
     return (
       <div id="wd-assignments-group-btn" className="d-flex">
-            <div className="d-flex float-start w-50 me-auto input-group">
-                <span className="input-group-text"><FaSearch/></span>
+        <div className="d-flex float-start w-50 me-auto input-group">
+          <span className="input-group-text">
+            <FaSearch />
+          </span>
           <input
             type="search"
             placeholder="Search..."
@@ -28,6 +33,7 @@ export default function AssignmentsControls() {
           variant="danger"
           className="me-1 float-end btn-md"
           id="wd-assignments-add-assignments-btn"
+          onClick={() => navigate(`/Kambaz/Courses/${cid}/Assignments/new`)}
         >
           <FaPlus
             className="position-relative me-2"

@@ -29,11 +29,20 @@ import VariableTypes from "./VariableTypes";
 import Square from "./Square";
 import Highlight from "./Highlight";
 import PathParameters from "./PathParameters";
+import { ListGroup } from "react-bootstrap";
+import { useSelector } from "react-redux";
 export default function Lab3() {
   console.log("Hello World!");
+  const { todos } = useSelector((state: any) => state.todosReducer);
   return (
     <div id="wd-lab3">
       <h3>Lab 3</h3>
+      <ListGroup>
+        {todos.map((todo: any) => (
+          <ListGroup.Item key={todo.id}>{todo.title}</ListGroup.Item>
+        ))}
+      </ListGroup>
+      <hr />
       <VariablesAndConstants />
       <VariableTypes />
       <BooleanVariables />

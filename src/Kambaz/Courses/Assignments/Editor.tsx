@@ -1,147 +1,145 @@
-import {
-  FormGroup,
-  FormLabel,
-  FormControl,
-  FormSelect,
-  FormCheck,
-  Button,
-} from "react-bootstrap";
-import * as db from "../../Database";
-import { Link, useParams } from "react-router";
-export default function AssignmentEditor() {
-  const assignments = db.assignments;
-  const { aid, cid } = useParams();
-  const assignment = assignments.find((a) => a._id === aid);
-  return (
-    <div id="wd-assignments-editor">
-      <FormGroup controlId="wd-assignment-name" className="mb-3">
-        <FormLabel>Assignment Name</FormLabel>
-        <FormControl type="text" value={assignment ? assignment.title : ""} />
-      </FormGroup>
+import React, { useState } from "react";
+import { FormGroup, FormLabel, FormControl, Button } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { addAssignment, updateAssignment } from "./reducer";
 
-      <FormGroup controlId="wd-description">
+export default function AssignmentEditor() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { cid } = useParams();
+  const { aid } = useParams();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const [assignment, setAssignment] = useState<any | null>(
+    aid !== "new"
+      ? assignments.find((a: any) => a._id === aid)
+      : { course: cid }
+  );
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setAssignment((prev: any) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSave = () => {
+    if (!assignment.title) {
+      alert("Please enter an assignment title");
+      return;
+    }
+    if (!assignment.description) {
+      alert("Please enter an assignment description");
+      return;
+    }
+    if (!assignment.points) {
+      alert("Please enter a number of points");
+      return;
+    }
+    if (!assignment.dueDate) {
+      alert("Please select a due date");
+      return;
+    }
+    if (!assignment.availableFrom || !assignment.availableUntil) {
+      alert("Please select availability dates");
+      return;
+    }
+
+    if (aid === "new") {
+      dispatch(addAssignment(assignment));
+    } else {
+      dispatch(updateAssignment(assignment));
+    }
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
+
+  const handleCancel = () => {
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
+
+  return (
+    <div className="p-4">
+      <h2>{aid !== "new" ? "Edit Assignment" : "New Assignment"}</h2>
+      <FormGroup className="mb-3">
+        <FormLabel>Assignment Name</FormLabel>
         <FormControl
-          className="mb-3"
-          rows={10}
-          as="textarea"
-          value="The assignment is available online. Submit a link to the landing page of your Web application running on Netlify. The landing page should include the following: Your full name and section. Links to each of the lab assignments. Link to the Kambaz application. Links to all relevant source code repositories. The Kambaz application should include a link to navigate back to the landing page."
+          type="text"
+          name="title"
+          value={assignment.title}
+          onChange={handleChange}
+          placeholder="Enter assignment name"
+          required
         />
       </FormGroup>
-      <FormGroup controlId="wd-points" className="row mb-3">
-        <FormLabel className="col-sm-2 col-form-label">Points</FormLabel>
-        <div className="col-sm-10">
-          <FormControl id="wd-points" type="number" value={100} />
-        </div>
-      </FormGroup>
-      <FormGroup controlId="wd-group" className="row mb-3">
-        <FormLabel className="col-sm-2 col-form-label">
-          Assignment Group
-        </FormLabel>
-        <div className="col-sm-10">
-          <FormSelect id="wd-group">
-            <option selected value="ASSIGNMENTS">
-              ASSIGNMENTS
-            </option>
-          </FormSelect>
-        </div>
-      </FormGroup>
-      <FormGroup controlId="wd-display-grade-as" className="row mb-3">
-        <FormLabel className="col-sm-2 col-form-label">
-          Display Grade as
-        </FormLabel>
-        <div className="col-sm-10">
-          <FormSelect id="wd-display-grade-as">
-            <option selected value="PERCENTAGE">
-              Percentage
-            </option>
-          </FormSelect>
-        </div>
-      </FormGroup>
-      <FormGroup controlId="wd-submission-type" className="row mb-3">
-        <FormLabel className="col-sm-2 col-form-label">
-          Submission Type
-        </FormLabel>
-        <div className="col-sm-10">
-          <div className="border rounded">
-            <FormSelect className="m-4" id="wd-submission-type">
-              <option selected value="ONLINE">
-                Online
-              </option>
-            </FormSelect>
-            <div className="ms-4">
-              <FormLabel className="mb-3">Online Entry Options</FormLabel>
-              <FormCheck className="mb-3">
-                <FormCheck.Input type="checkbox" id="wd-text-entry" />
-                <FormCheck.Label htmlFor="wd-text-entry">
-                  Text Entry
-                </FormCheck.Label>
-              </FormCheck>
-              <FormCheck className="mb-3">
-                <FormCheck.Input type="checkbox" id="wd-website-url" />
-                <FormCheck.Label htmlFor="wd-website-url">
-                  Website URL
-                </FormCheck.Label>
-              </FormCheck>
-              <FormCheck className="mb-3">
-                <FormCheck.Input type="checkbox" id="wd-media-recordings" />
-                <FormCheck.Label htmlFor="wd-media-recordings">
-                  Media Recordings
-                </FormCheck.Label>
-              </FormCheck>
-              <FormCheck className="mb-3">
-                <FormCheck.Input type="checkbox" id="wd-student-annotation" />
-                <FormCheck.Label htmlFor="wd-student-annotation">
-                  Student Annotation
-                </FormCheck.Label>
-              </FormCheck>
-              <FormCheck className="mb-3">
-                <FormCheck.Input type="checkbox" id="wd-file-uploads" />
-                <FormCheck.Label htmlFor="wd-file-uploads">
-                  File Uploads
-                </FormCheck.Label>
-              </FormCheck>
-            </div>
-          </div>
-        </div>
-      </FormGroup>
-      <FormGroup className="row mb-3">
-        <FormLabel className="col-sm-2 col-form-label">Assign</FormLabel>
-        <div className="col-sm-10">
-          <div className="border rounded">
-            <FormGroup className="m-4">
-              <FormLabel>Assign to</FormLabel>
-              <FormControl type="text" id="wd-assign-to" value="Everyone" />
-            </FormGroup>
-            <FormGroup className="m-4">
-              <FormLabel>Due</FormLabel>
-              <FormControl type="date" id="wd-due-date" />
-            </FormGroup>
-            <div className="row mb-3 m-3">
-              <FormGroup className="w-50">
-                <FormLabel>Available from</FormLabel>
-                <FormControl type="date" id="wd-available-from" />
-              </FormGroup>
-              <FormGroup className="w-50">
-                <FormLabel>Until </FormLabel>
-                <FormControl type="date" id="wd-available-until" />
-              </FormGroup>
-            </div>
-          </div>
-        </div>
-      </FormGroup>
-      <hr />
-      <div className="d-flex justify-content-end align-items-center">
-        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-          <Button id="wd-cancel" className="btn btn-secondary me-2">
-            Cancel
-          </Button>
-        </Link>
 
-        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-          <Button id="wd-save" className="btn btn-danger me-2">
-            Save
-          </Button>
-        </Link>
+      <FormGroup className="mb-3">
+        <FormLabel>Description</FormLabel>
+        <FormControl
+          as="textarea"
+          rows={5}
+          name="description"
+          value={assignment.description}
+          onChange={handleChange}
+          placeholder="Enter assignment description"
+          required
+        />
+      </FormGroup>
+
+      <FormGroup className="mb-3">
+        <FormLabel>Points</FormLabel>
+        <FormControl
+          type="number"
+          name="points"
+          value={assignment.points}
+          onChange={handleChange}
+          min={0}
+          required
+        />
+      </FormGroup>
+
+      <FormGroup className="mb-3">
+        <FormLabel>Due Date</FormLabel>
+        <FormControl
+          type="datetime-local"
+          name="dueDate"
+          value={assignment.dueDate}
+          onChange={handleChange}
+          required
+        />
+      </FormGroup>
+
+      <FormGroup className="mb-3">
+        <FormLabel>Available From</FormLabel>
+        <FormControl
+          type="datetime-local"
+          name="availableFrom"
+          value={assignment.availableFrom}
+          onChange={handleChange}
+          required
+        />
+      </FormGroup>
+
+      <FormGroup className="mb-3">
+        <FormLabel>Available Until</FormLabel>
+        <FormControl
+          type="datetime-local"
+          name="availableUntil"
+          value={assignment.availableUntil}
+          onChange={handleChange}
+          required
+        />
+      </FormGroup>
+
+      <div className="d-flex justify-content-end gap-2">
+        <Button variant="secondary" onClick={handleCancel}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={handleSave}>
+          Save
+        </Button>
       </div>
     </div>
   );

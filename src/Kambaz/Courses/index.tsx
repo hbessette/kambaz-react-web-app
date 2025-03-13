@@ -12,11 +12,26 @@ import {
 import AssignmentEditor from "./Assignments/Editor";
 import PeopleTable from "./People/Table";
 import { FaAlignJustify } from "react-icons/fa";
-import { courses } from "../Database";
+import { useSelector } from "react-redux";
+
 export default function Courses() {
   const { cid } = useParams();
-    const { pathname } = useLocation();
-    const course = courses.find((course) => course._id === cid);
+  const { pathname } = useLocation();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+  const course = useSelector((state: any) =>
+    state.coursesReducer.courses.find((course: any) => course._id === cid)
+  );
+
+  const isEnrolled = enrollments.some(
+    (enrollment: any) =>
+      enrollment.user === currentUser._id && enrollment.course === cid
+  );
+
+  if (!isEnrolled && currentUser.role !== "FACULTY") {
+    return <Navigate to="/Kambaz/Dashboard" />;
+  }
+
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
