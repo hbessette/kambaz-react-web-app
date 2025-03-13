@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button, Card, Col, FormControl, Row } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
-import * as db from "./Database";
 import { addCourse, deleteCourse, updateCourse } from "./Courses/reducer";
 import {
   toggleShowAllCourses,
