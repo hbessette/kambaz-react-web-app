@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FormControl } from "react-bootstrap";
 import FormCheckInput from "react-bootstrap/esm/FormCheckInput";
 const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;

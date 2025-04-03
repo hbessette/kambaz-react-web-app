@@ -56,7 +56,7 @@ export default function Dashboard() {
 
   const handleEnrollToggle = async (courseId: string) => {
     if (isEnrolled(courseId)) {
-      const status = await userClient.unenrollUserFromCourse(
+      await userClient.unenrollUserFromCourse(
         courseId as string
       );
       dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
@@ -72,7 +72,7 @@ export default function Dashboard() {
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    const status = await courseClient.deleteCourse(courseId);
+    await courseClient.deleteCourse(courseId);
     dispatch(deleteCourse(courseId));
   };
 
