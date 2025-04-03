@@ -3,7 +3,8 @@ import { FormGroup, FormLabel, FormControl, Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { addAssignment, updateAssignment } from "./reducer";
-
+import * as assignmentsClient from "./client.ts";
+import * as coursesClient from "../client.ts";
 export default function AssignmentEditor() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -26,7 +27,7 @@ export default function AssignmentEditor() {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!assignment.title) {
       alert("Please enter an assignment title");
       return;
@@ -49,9 +50,11 @@ export default function AssignmentEditor() {
     }
 
     if (aid === "new") {
-      dispatch(addAssignment(assignment));
+      const newAssignment = await coursesClient.createAssignmentForCourse(cid as string, assignment);
+      dispatch(addAssignment(newAssignment));
     } else {
-      dispatch(updateAssignment(assignment));
+      const newAssignment = await assignmentsClient.updateAssignment(assignment)
+      dispatch(updateAssignment(newAssignment));
     }
     navigate(`/Kambaz/Courses/${cid}/Assignments`);
   };

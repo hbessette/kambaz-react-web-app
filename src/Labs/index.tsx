@@ -6,6 +6,7 @@ import Lab3 from "./Lab3/index.tsx";
 import Lab4 from "./Lab4/index.tsx";
 import { Provider } from "react-redux";
 import store from "./store/index.tsx";
+import Lab5 from "./Lab5/index.tsx";
 export default function Labs() {
   return (
     <Provider store={store}>
@@ -18,6 +19,7 @@ export default function Labs() {
           <Route path="Lab2/*" element={<Lab2 />} />
           <Route path="Lab3/*" element={<Lab3 />} />
           <Route path="Lab4/*" element={<Lab4 />} />
+          <Route path="Lab5/*" element={<Lab5 />} />
         </Routes>
       </div>
     </Provider>

@@ -6,9 +6,10 @@ import LessonControlButtons from "../Modules/LessonControlButtons";
 import { FaPenToSquare, FaCaretDown } from "react-icons/fa6";
 import { Link, useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteAssignment } from "./reducer";
-import { useState } from "react";
-
+import { deleteAssignment, setAssignments } from "./reducer";
+import { useEffect, useState } from "react";
+import * as assignmentsClient from "./client.ts";
+import * as coursesClient from "../client.ts";
 export default function Assignments() {
   const { cid } = useParams();
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
@@ -18,14 +19,24 @@ export default function Assignments() {
     id: string;
     title: string;
   } | null>(null);
+  const fetchAssignments = async () => {
+    const assignments = await coursesClient.findAssignmentsForCourse(
+      cid as string
+    );
+    dispatch(setAssignments(assignments));
+  };
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
 
   const handleDelete = (assignmentId: string, assignmentTitle: string) => {
     setAssignmentToDelete({ id: assignmentId, title: assignmentTitle });
     setShowConfirmDialog(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (assignmentToDelete) {
+      await assignmentsClient.deleteAssignment(assignmentToDelete.id);
       dispatch(deleteAssignment(assignmentToDelete.id));
     }
     setShowConfirmDialog(false);
@@ -36,6 +47,7 @@ export default function Assignments() {
     setShowConfirmDialog(false);
     setAssignmentToDelete(null);
   };
+
 
   return (
     <div>
@@ -50,43 +62,39 @@ export default function Assignments() {
             <span className="font-weight-bold">ASSIGNMENTS</span>
             <AssignmentTitleControlButtons />
           </div>
-          {assignments
-            .filter((assignment: any) => assignment.course === cid)
-            .map((assignment: any) => (
-              <ListGroup.Item
-                key={assignment._id}
-                className="wd-lesson p-3 ps-1 d-flex align-items-center justify-content-between"
-              >
-                <div>
-                  <BsGripVertical className="me-2 fs-3" />
-                  <Link
-                    to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
-                    className="text-success"
-                  >
-                    <FaPenToSquare />
-                  </Link>
-                </div>
-                <div>
-                  <strong>{assignment.title}</strong>
+          {assignments.map((assignment: any) => (
+            <ListGroup.Item
+              key={assignment._id}
+              className="wd-lesson p-3 ps-1 d-flex align-items-center justify-content-between"
+            >
+              <div>
+                <BsGripVertical className="me-2 fs-3" />
+                <Link
+                  to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
+                  className="text-success"
+                >
+                  <FaPenToSquare />
+                </Link>
+              </div>
+              <div>
+                <strong>{assignment.title}</strong>
+                <br />
+                <small>
+                  Due {new Date(assignment.dueDate).toLocaleString()} |{" "}
+                  {assignment.points} pts
                   <br />
-                  <small>
-                    Due {new Date(assignment.dueDate).toLocaleString()} |{" "}
-                    {assignment.points} pts
-                    <br />
-                    Available from{" "}
-                    {new Date(
-                      assignment.availableFrom
-                    ).toLocaleString()} until{" "}
-                    {new Date(assignment.availableUntil).toLocaleString()}
-                  </small>
-                </div>
-                <LessonControlButtons
-                  onDelete={() =>
-                    handleDelete(assignment._id, assignment.title)
-                  }
-                />
-              </ListGroup.Item>
-            ))}
+                  Available from{" "}
+                  {new Date(
+                    assignment.availableFrom
+                  ).toLocaleString()} until{" "}
+                  {new Date(assignment.availableUntil).toLocaleString()}
+                </small>
+              </div>
+              <LessonControlButtons
+                onDelete={() => handleDelete(assignment._id, assignment.title)}
+              />
+            </ListGroup.Item>
+          ))}
         </ListGroup.Item>
       </ListGroup>
 
