@@ -13,25 +13,27 @@ import AssignmentEditor from "./Assignments/Editor";
 import PeopleTable from "./People/Table";
 import { FaAlignJustify } from "react-icons/fa";
 import { useSelector } from "react-redux";
-
+import * as coursesClient from "./client";
+import { useEffect, useState } from "react";
 export default function Courses() {
   const { cid } = useParams();
   const { pathname } = useLocation();
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
   const course = useSelector((state: any) =>
     state.coursesReducer.courses.find((course: any) => course._id === cid)
   );
-
-  const isEnrolled = enrollments.some(
-    (enrollment: any) =>
-      enrollment.user === currentUser._id && enrollment.course === cid
-  );
-
-  if (!isEnrolled && currentUser.role !== "FACULTY") {
-    return <Navigate to="/Kambaz/Dashboard" />;
+  const [users, setUsers] = useState < any[] >([])
+  const fetchUsers = async () => {
+    try {
+      const users = await coursesClient.findUsersForCourse(cid as string)
+      setUsers(users)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
+  useEffect(() => {
+    fetchUsers()
+  }, []);
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
@@ -50,7 +52,7 @@ export default function Courses() {
             <Route path="/Modules" element={<Modules />} />
             <Route path="/Assignments" element={<Assignments />} />
             <Route path="/Assignments/:aid" element={<AssignmentEditor />} />
-            <Route path="/People" element={<PeopleTable />} />
+            <Route path="/People" element={<PeopleTable users={users} />} />
           </Routes>
         </div>
       </div>

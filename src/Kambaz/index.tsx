@@ -8,11 +8,6 @@ import ProtectedRoute from "./Account/ProtectedRoute";
 import Session from "./Account/Session";
 
 export default function Kambaz() {
-
-
-
-
-
   return (
     <Session>
       <div id="wd-kambaz">
@@ -25,7 +20,7 @@ export default function Kambaz() {
               path="/Dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard/>
+                  <Dashboard />
                 </ProtectedRoute>
               }
             />

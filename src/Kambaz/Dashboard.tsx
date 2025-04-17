@@ -7,108 +7,105 @@ import {
   updateCourse,
   setCourses,
 } from "./Courses/reducer";
-import {
-  toggleShowAllCourses,
-  enrollInCourse,
-  unenrollFromCourse,
-  setEnrollments,
-} from "./Courses/enrollmentsReducer";
 import { useEffect, useState } from "react";
 import * as userClient from "./Account/client";
 import * as courseClient from "./Courses/client";
 export default function Dashboard() {
-  const dispatch = useDispatch();
-  const { courses } = useSelector((state: any) => state.coursesReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments, showAllCourses } = useSelector(
-    (state: any) => state.enrollmentsReducer
-  );
-  const fetchCourses = async () => {
-    try {
-      const courses = await userClient.findMyCourses();
-      dispatch(setCourses(courses));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    fetchCourses();
-  }, [currentUser]);
+    const dispatch = useDispatch();
+    const { courses } = useSelector((state: any) => state.coursesReducer);
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const [enrolling, setEnrolling] = useState<boolean>(false);
+    const [course, setCourse] = useState({
+      _id: "RS101",
+      name: "New Course",
+      number: "New Number",
+      startDate: "2023-09-10",
+      endDate: "2023-12-15",
+      image: "/images/reactjs.jpg",
+      description: "New Description",
+    });
+    const findCoursesForUser = async () => {
+      try {
+        const newCourses = await userClient.findCoursesForUser(currentUser._id);
+        dispatch(setCourses(newCourses));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const fetchCourses = async () => {
+      try {
+        const allCourses = await courseClient.fetchAllCourses();
+        const enrolledCourses = await userClient.findCoursesForUser(
+          currentUser._id
+        );
+        const newCourses = allCourses.map((course: any) => {
+          if (enrolledCourses.find((c: any) => c._id === course._id)) {
+            return { ...course, enrolled: true };
+          } else {
+            return course;
+          }
+        });
+        dispatch(setCourses(newCourses));
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-  const isFaculty = currentUser.role === "FACULTY";
+    const handleAddCourse = async () => {
+      const newCourse = await courseClient.createCourse(course);
+      dispatch(addCourse(newCourse));
+    };
 
-  const [course, setCourse] = useState({
-    _id: "RS101",
-    name: "New Course",
-    number: "New Number",
-    startDate: "2023-09-10",
-    endDate: "2023-12-15",
-    image: "/images/reactjs.jpg",
-    description: "New Description",
-  });
+    const handleDeleteCourse = async (courseId: string) => {
+      await courseClient.deleteCourse(courseId);
+      dispatch(deleteCourse(courseId));
+    };
 
-  const isEnrolled = (courseId: string) => {
-    return enrollments.some(
-      (enrollment: any) =>
-        enrollment.user === currentUser._id && enrollment.course === courseId
-    );
-  };
+    const handleUpdateCourse = async () => {
+      await courseClient.updateCourse(course);
+      dispatch(updateCourse(course));
+    };
 
-  const handleEnrollToggle = async (courseId: string) => {
-    if (isEnrolled(courseId)) {
-      await userClient.unenrollUserFromCourse(
-        courseId as string
+    const updateEnrollment = async (courseId: string, enrolled: boolean) => {
+      if (enrolled) {
+        await userClient.enrollIntoCourse(currentUser._id, courseId);
+      } else {
+        await userClient.unenrollFromCourse(currentUser._id, courseId);
+      }
+      dispatch(
+        setCourses(
+          courses.map((course: { _id: string }) => {
+            if (course._id === courseId) {
+              return { ...course, enrolled: enrolled };
+            } else {
+              return course;
+            }
+          })
+        )
       );
-      dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
-    } else {
-      const enrollment = await userClient.enrollUserInCourse(courseId as string);
-      dispatch(enrollInCourse(enrollment));
-    }
-  };
-
-  const handleAddCourse = async () => {
-    const newCourse = await userClient.createCourse(course);
-    dispatch(addCourse(newCourse));
-  };
-
-  const handleDeleteCourse = async (courseId: string) => {
-    await courseClient.deleteCourse(courseId);
-    dispatch(deleteCourse(courseId));
-  };
-
-  const handleUpdateCourse = async () => {
-    await courseClient.updateCourse(course);
-    dispatch(updateCourse(course));
-  };
-
-  const fetchEnrollments = async () => {
-    try {
-      const enrollments = await userClient.findEnrollments();
-      dispatch(setEnrollments(enrollments));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    };
 
   useEffect(() => {
-    fetchEnrollments();
-  }, [currentUser]);
-
+      if (enrolling) {
+        fetchCourses();
+      } else {
+        findCoursesForUser();
+      }
+    }, [currentUser, enrolling]);
   return (
     <div id="wd-dashboard">
       <div className="d-flex justify-content-between align-items-center">
         <h1 id="wd-dashboard-title">Dashboard</h1>
         <Button
           variant="primary"
-          onClick={() => dispatch(toggleShowAllCourses())}
+          onClick={() => setEnrolling(!enrolling)}
           className="mb-2"
         >
-          {showAllCourses ? "Show My Courses" : "Show All Courses"}
+          {enrolling ? "Show My Courses" : "Show All Courses"}
         </Button>
       </div>
       <hr />
-
-      {isFaculty && (
+      {currentUser.role != "STUDENT" &&
         <>
           <h5>
             New Course
@@ -142,10 +139,9 @@ export default function Dashboard() {
             }
           />
         </>
-      )}
-
+      }
       <h2 id="wd-dashboard-published">
-        {showAllCourses ? "All Courses" : "My Courses"} ({courses.length})
+        {enrolling ? "All Courses" : "My Courses"} ({courses.length})
       </h2>
       <hr />
       <div id="wd-dashboard-courses">
@@ -176,7 +172,7 @@ export default function Dashboard() {
 
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
-                      {isEnrolled(course._id) && (
+                      {!enrolling && (
                         <Link
                           to={`/Kambaz/Courses/${course._id}/Home`}
                           className="wd-dashboard-course-link text-decoration-none"
@@ -186,7 +182,7 @@ export default function Dashboard() {
                       )}
                     </div>
                     <div>
-                      {isFaculty && (
+                      {currentUser.role != "USER" &&
                         <>
                           <Button
                             variant="warning"
@@ -207,14 +203,20 @@ export default function Dashboard() {
                             Delete
                           </Button>
                         </>
+                      }
+                      {enrolling && (
+                        <button
+                          onClick={(event) => {
+                            event.preventDefault();
+                            updateEnrollment(course._id, !course.enrolled);
+                          }}
+                          className={`btn ${
+                            course.enrolled ? "btn-danger" : "btn-success"
+                          } float-end`}
+                        >
+                          {course.enrolled ? "Unenroll" : "Enroll"}
+                        </button>
                       )}
-                      <Button
-                        variant={isEnrolled(course._id) ? "danger" : "success"}
-                        size="sm"
-                        onClick={() => handleEnrollToggle(course._id)}
-                      >
-                        {isEnrolled(course._id) ? "Unenroll" : "Enroll"}
-                      </Button>
                     </div>
                   </div>
                 </Card.Body>

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 export default function PeopleTable({ users = [], fetchUsers} : { users? : any[], fetchUsers? : any}) {
   return (
     <div id="wd-people-table">
-      <PeopleDetails fetchUsers={fetchUsers} />
+      {fetchUsers && <PeopleDetails fetchUsers={fetchUsers} />}
       <Table striped>
         <thead>
           <tr>
