@@ -15,6 +15,8 @@ import { FaAlignJustify } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import * as coursesClient from "./client";
 import { useEffect, useState } from "react";
+import Quizzes from "./Quizzes";
+import QuizEditor from "./Quizzes/QuizEditor";
 export default function Courses() {
   const { cid } = useParams();
   const { pathname } = useLocation();
@@ -53,6 +55,8 @@ export default function Courses() {
             <Route path="/Assignments" element={<Assignments />} />
             <Route path="/Assignments/:aid" element={<AssignmentEditor />} />
             <Route path="/People" element={<PeopleTable users={users} />} />
+            <Route path="/Quizzes" element={<Quizzes />} />
+            <Route path="/Quizzes/:qid" element={<QuizEditor/>} />
           </Routes>
         </div>
       </div>
