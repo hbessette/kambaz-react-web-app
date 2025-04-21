@@ -14,10 +14,26 @@ export default function QuizEditor() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { questions } = useSelector((state: any) => state.questionsReducer);
   const [activeTab, setActiveTab] = useState("details");
+  const [submitAction, setSubmitAction] = useState<"save" | "publish">("save");
   const [quiz, setQuiz] = useState<any | null>(
     qid !== "new"
       ? quizzes.find((q: any) => q._id === qid)
-      : { course: cid, published: false }
+      : {
+          course: cid,
+          published: false,
+          points: 0,
+          quizType: "Graded Quiz",
+          assignmentGroup: "Quizzes",
+          shuffleAnswers: true,
+          timeLimit: true,
+          timeLimitAmount: 20,
+          multipleAttempts: false,
+          howManyAttempts: 1,
+          lockQuestionsAfterAnswering: false,
+          accessCode: "",
+          oneQuestionAtATime: true,
+          webcamRequired: false,
+        }
   );
   const handleChange = (
     e: React.ChangeEvent<
@@ -48,14 +64,17 @@ export default function QuizEditor() {
         const newQuestions = await quizzesClient.updateAllQuestionsForQuiz(
           qid as string,
           questions
-        )
-        dispatch(setQuestions(newQuestions))
+        );
+        dispatch(setQuestions(newQuestions));
         dispatch(addQuiz(newQuiz));
         navigate(-1);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(quizToSave);
-        const updatedQuestions = await quizzesClient.updateAllQuestionsForQuiz(qid as string, questions)
-        dispatch(setQuestions(updatedQuestions))
+        const updatedQuestions = await quizzesClient.updateAllQuestionsForQuiz(
+          qid as string,
+          questions
+        );
+        dispatch(setQuestions(updatedQuestions));
         dispatch(updateQuiz(updatedQuiz));
         navigate(-1);
       }
@@ -63,16 +82,25 @@ export default function QuizEditor() {
       console.error("Error saving quiz:", error);
     }
   };
-
-    const fetchQuestions = async () => {
-      const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
-      dispatch(setQuestions(questions));
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Submit action:", submitAction);
+    if (submitAction === "publish") {
+      handleSave(true)
+    } else {
+      handleSave(quiz.published)
+    }
   };
 
-    useEffect(() => {
-      fetchQuestions();
-    }, []);
-  
+  const fetchQuestions = async () => {
+    const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
+    dispatch(setQuestions(questions));
+  };
+
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
   return (
     <div className="container mt-4 border rounded p-4 bg-white">
       <div className="d-flex justify-content-between mb-3">
@@ -110,7 +138,7 @@ export default function QuizEditor() {
       </ul>
 
       {activeTab === "details" ? (
-        <>
+        <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <input
               type="text"
@@ -119,6 +147,7 @@ export default function QuizEditor() {
               name="title"
               value={quiz.title}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -129,6 +158,7 @@ export default function QuizEditor() {
             name="description"
             value={quiz.description}
             onChange={handleChange}
+            required
           ></textarea>
           <hr />
 
@@ -140,11 +170,12 @@ export default function QuizEditor() {
                 name="quizType"
                 value={quiz.quizType}
                 onChange={handleChange}
+                required
               >
-                <option>Graded Quiz</option>
-                <option>Practice Quiz</option>
-                <option>Graded Survey</option>
-                <option>Practice Survey</option>
+                <option value="Graded Quiz">Graded Quiz</option>
+                <option value="Practice Quiz">Practice Quiz</option>
+                <option value="Graded Survey">Graded Survey</option>
+                <option value="Practice Survey">Practice Survey</option>
               </select>
             </div>
             <div className="col-md-6 mb-2">
@@ -154,11 +185,12 @@ export default function QuizEditor() {
                 name="assignmentGroup"
                 value={quiz.assignmentGroup}
                 onChange={handleChange}
+                required
               >
-                <option>Quizzes</option>
-                <option>Exams</option>
-                <option>Assignments</option>
-                <option>Project</option>
+                <option value="Quizzes">Quizzes</option>
+                <option value="Exams">Exams</option>
+                <option value="Assignments">Assignments</option>
+                <option value="Project">Project</option>
               </select>
             </div>
           </div>
@@ -171,7 +203,7 @@ export default function QuizEditor() {
                 type="checkbox"
                 id="shuffleAnswers"
                 name="shuffleAnswers"
-                value={quiz.shuffleAnswers}
+                checked={quiz.shuffleAnswers}
                 onChange={handleChange}
               />
               <label className="form-check-label" htmlFor="shuffleAnswers">
@@ -297,6 +329,7 @@ export default function QuizEditor() {
                 name="dueDate"
                 value={quiz.dueDate}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -309,6 +342,7 @@ export default function QuizEditor() {
                   name="availableDate"
                   value={quiz.availableDate}
                   onChange={handleChange}
+                  required
                 />
               </div>
               <div className="col">
@@ -319,6 +353,7 @@ export default function QuizEditor() {
                   name="untilDate"
                   value={quiz.untilDate}
                   onChange={handleChange}
+                  required
                 />
               </div>
             </div>
@@ -333,20 +368,22 @@ export default function QuizEditor() {
             </button>
             <button
               className="btn btn-secondary me-2"
-              onClick={() => handleSave(true)}
+              type="submit"
+              onClick={() => setSubmitAction("publish")}
             >
               Save and Publish
             </button>
             <button
               className="btn btn-danger"
-              onClick={() => handleSave(false)}
+              type="submit"
+              onClick={() => setSubmitAction("save")}
             >
               Save
             </button>
           </div>
-        </>
+        </form>
       ) : (
-          <QuestionEditor quiz={quiz} setQuiz={setQuiz} />
+        <QuestionEditor quiz={quiz} setQuiz={setQuiz} />
       )}
     </div>
   );

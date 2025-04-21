@@ -182,7 +182,7 @@ export default function Dashboard() {
                       )}
                     </div>
                     <div>
-                      {currentUser.role != "USER" &&
+                      {currentUser.role != "STUDENT" &&
                         <>
                           <Button
                             variant="warning"

@@ -64,7 +64,11 @@ export default function Profile() {
             }
           />
           <FormControl
-            defaultValue={profile.dob}
+            defaultValue={
+              profile.dob
+                ? new Date(profile.dob).toISOString().split("T")[0]
+                : ""
+            }
             id="wd-dob"
             className="mb-2"
             onChange={(e) => setProfile({ ...profile, dob: e.target.value })}
@@ -77,6 +81,7 @@ export default function Profile() {
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
           />
           <select
+            defaultValue={profile.role}
             onChange={(e) => setProfile({ ...profile, role: e.target.value })}
             className="form-control mb-2"
             id="wd-role"

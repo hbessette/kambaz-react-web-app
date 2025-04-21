@@ -9,7 +9,6 @@ import { setQuizzes } from "./reducer";
 import * as userClient from "../../Account/client";
 import {
   addQuizAttempt,
-  setQuizAttempts,
   updateQuizAttempt,
 } from "./QuizAttempt/reducer";
 import * as quizAttemptClient from "./QuizAttempt/client";
@@ -129,9 +128,6 @@ export default function QuizTaker() {
 
     const totalPoints = questions.reduce((sum, q) => sum + (q.points || 1), 0);
     const percentageScore = Math.round((score / totalPoints) * 100);
-    console.log(percentageScore);
-    console.log(totalPoints);
-    console.log(score);
     setTotalPoints(score);
     setQuizScore(percentageScore);
     setQuizCompleted(true);
@@ -187,14 +183,14 @@ export default function QuizTaker() {
   };
 
   useEffect(() => {
-    if (!quizCompleted) return;
+    if (!quizCompleted || currentUser.role !== "STUDENT") return;
     const attemptAnswers = questions.map((question) => {
       const userAnswer = answers[question._id];
       let pointsEarned = 0;
         if (userAnswer !== null && userAnswer !== "") {
             console.log(userAnswer)
             console.log(question.correctAnswer)
-            console.log(question.correctAnswers)
+            console.log(question.correctAnswers);
         if (question.questionType === "Multiple Choice") {
           if (userAnswer.toString() === question.correctAnswer) {
             pointsEarned = question.points;

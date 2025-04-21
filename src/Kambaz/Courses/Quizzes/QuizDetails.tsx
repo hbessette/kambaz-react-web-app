@@ -7,14 +7,16 @@ import * as coursesClient from "../client";
 import { setQuizzes } from "./reducer";
 import * as userClient from "../../Account/client";
 import { setQuizAttempts } from "./QuizAttempt/reducer";
-import * as quizzesClient from "./client"
+import * as quizzesClient from "./client";
 export default function QuizDetails() {
   const { qid, cid } = useParams();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
-    const quiz = quizzes.find((q: any) => q._id == qid);
-    const { quizAttempts } = useSelector((state: any) => state.quizAttemptReducer);
-    const [questions, setQuestions] = useState([]);
+  const quiz = quizzes.find((q: any) => q._id == qid);
+  const { quizAttempts } = useSelector(
+    (state: any) => state.quizAttemptReducer
+  );
+  const [questions, setQuestions] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [accessCode, setAccessCode] = useState("");
@@ -47,15 +49,13 @@ export default function QuizDetails() {
     fetchQuizAttempts();
   }, []);
 
-    useEffect(() => {
-      const fetchQuestions = async () => {
-          const questions = await quizzesClient.findQuestionsForQuiz(
-            qid as string
-          );
-          setQuestions(questions);
-        }
-      fetchQuestions();
-    }, [quiz]);
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const questions = await quizzesClient.findQuestionsForQuiz(qid as string);
+      setQuestions(questions);
+    };
+    fetchQuestions();
+  }, [quiz]);
 
   const handleAccessCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +63,27 @@ export default function QuizDetails() {
       navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Take`);
     } else {
       setAccessCodeError("Invalid access code. Please try again.");
+    }
+  };
+
+  const availability = (quiz: any) => {
+    const currentDate = new Date();
+    const availableFrom = new Date(quiz.availableDate);
+    const availableUntil = new Date(quiz.untilDate);
+    if (currentDate < availableFrom) {
+      return false;
+    } else if (currentDate >= availableFrom && currentDate <= availableUntil) {
+      if (
+        currentUser.role == "STUDENT" &&
+        quiz.multipleAttempts &&
+        quizAttempts.length > 0 &&
+        quizAttempts[0].attemptNumber >= quiz.howManyAttempts
+      ) {
+        return false;
+      }
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -201,41 +222,51 @@ export default function QuizDetails() {
             <p>
               <strong>Available Until:</strong> {quiz.untilDate}
             </p>
+            <p>
+              <>
+                <strong>Attempts:</strong>{" "}
+                {quizAttempts.length > 0 ? quizAttempts[0].attemptNumber : 0} /{" "}
+                {quiz.howManyAttempts}
+              </>
+            </p>
           </div>
+          {availability(quiz) && (
+            <>
+              {quiz.accessCode && (
+                <div className="mb-4">
+                  <h5>This quiz requires an access code</h5>
+                  <Form onSubmit={handleAccessCodeSubmit}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Access Code</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        placeholder="Enter access code"
+                        isInvalid={!!accessCodeError}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {accessCodeError}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                    <Button type="submit" variant="primary">
+                      Submit
+                    </Button>
+                  </Form>
+                </div>
+              )}
 
-          {quiz.accessCode && (
-            <div className="mb-4">
-              <h5>This quiz requires an access code</h5>
-              <Form onSubmit={handleAccessCodeSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Access Code</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    placeholder="Enter access code"
-                    isInvalid={!!accessCodeError}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {accessCodeError}
-                  </Form.Control.Feedback>
-                </Form.Group>
-                <Button type="submit" variant="primary">
-                  Submit
+              {!quiz.accessCode && (
+                <Button
+                  variant="primary"
+                  onClick={() =>
+                    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Take`)
+                  }
+                >
+                  Take Quiz
                 </Button>
-              </Form>
-            </div>
-          )}
-
-          {!quiz.accessCode && (
-            <Button
-              variant="primary"
-              onClick={() =>
-                navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Take`)
-              }
-            >
-              Take Quiz
-            </Button>
+              )}
+            </>
           )}
         </div>
       )}

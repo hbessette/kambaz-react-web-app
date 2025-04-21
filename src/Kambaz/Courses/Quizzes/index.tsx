@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, ListGroup, Dropdown } from "react-bootstrap";
 import {
   FaCaretDown,
@@ -8,6 +8,8 @@ import {
   FaEdit,
   FaTrash,
   FaCheck,
+  FaRegCheckSquare,
+  FaBan,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router";
@@ -15,7 +17,7 @@ import { useEffect } from "react";
 import * as coursesClient from "../client";
 import { setQuizzes, deleteQuiz, updateQuiz } from "./reducer";
 import * as quizzesClient from "./client";
-
+import * as userClient from "../../Account/client";
 
 export default function Quizzes() {
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
@@ -23,13 +25,39 @@ export default function Quizzes() {
   const navigate = useNavigate();
   const { cid } = useParams();
   const dispatch = useDispatch();
-
+  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>(
+    {}
+  );
+const [attemptScores, setAttemptScores] = useState<Record<string, number>>({});
   const isInstructor = currentUser?.role !== "STUDENT";
 
-  const fetchQuizzes = async () => {
-    const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
-    dispatch(setQuizzes(quizzes));
-  };
+const fetchQuizzes = async () => {
+  const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+  dispatch(setQuizzes(quizzes));
+
+  const scoreMap: Record<string, number> = {};
+  const questionCounts: Record<string, number> = {};
+
+  for (const quiz of quizzes) {
+    const attempts = await userClient.findQuizAttemptsForUser(
+      currentUser._id,
+      quiz._id
+    );
+
+    if (attempts.length > 0) {
+      const latestAttempt = attempts[attempts.length - 1];
+      scoreMap[quiz._id] = latestAttempt.totalScore;
+    } else {
+      scoreMap[quiz._id] = 0;
+    }
+
+    const questions = await quizzesClient.findQuestionsForQuiz(quiz._id);
+    questionCounts[quiz._id] = questions.length;
+  }
+
+  setAttemptScores(scoreMap);
+  setQuestionCounts(questionCounts);
+};
 
   const handleDelete = async (quizId: string) => {
     try {
@@ -53,10 +81,7 @@ export default function Quizzes() {
     }
   };
 
-
-
   useEffect(() => {
-    
     fetchQuizzes();
   }, []);
 
@@ -75,6 +100,19 @@ export default function Quizzes() {
       </Button>
     )
   );
+
+  const availability = (quiz: any) => {
+    const currentDate = new Date();
+    const availableFrom = new Date(quiz.availableDate);
+    const availableUntil = new Date(quiz.untilDate);
+    if (currentDate < availableFrom) {
+      return `Not available until ${availableFrom.toLocaleDateString()}`;
+    } else if (currentDate >= availableFrom && currentDate <= availableUntil) {
+      return "Available";
+    } else {
+      return "Closed";
+    }
+  };
 
   const visibleQuizzes = isInstructor
     ? quizzes
@@ -124,7 +162,7 @@ export default function Quizzes() {
               key={quiz._id}
               className="wd-lesson p-3 ps-1 d-flex align-items-center justify-content-between"
             >
-              <div>
+              <div className="ms-2">
                 <Link
                   to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/Details`}
                   className="text-decoration-none text-dark"
@@ -132,32 +170,45 @@ export default function Quizzes() {
                   <strong>{quiz.title}</strong>
                 </Link>
                 <br />
-                <small>{quiz.published ? "Published" : "Not Published"}</small>
+                <small>
+                  {availability(quiz)} | Due: {quiz.dueDate} | Points:{" "}
+                  {quiz.points} | Questions: {questionCounts[quiz._id] ?? "..."}{" "}
+                  {currentUser.role == "STUDENT" && (
+                    <>| Score: {attemptScores[quiz._id] ?? 0}</>
+                  )}
+                </small>
               </div>
               {isInstructor && (
-                <Dropdown align="end">
-                  <Dropdown.Toggle as={CustomToggle} />
-                  <Dropdown.Menu>
-                    <Dropdown.Item
-                      onClick={() =>
-                        navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`)
-                      }
-                    >
-                      <FaEdit className="me-2" /> Edit
-                    </Dropdown.Item>
-                    <Dropdown.Item onClick={() => handlePublish(quiz)}>
-                      <FaCheck className="me-2" />
-                      {quiz.published ? "Unpublish" : "Publish"}
-                    </Dropdown.Item>
-                    <Dropdown.Divider />
-                    <Dropdown.Item
-                      className="text-danger"
-                      onClick={() => handleDelete(quiz._id)}
-                    >
-                      <FaTrash className="me-2" /> Delete
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+                <div className="d-flex align-items-center">
+                  {quiz.published ? (
+                    <FaRegCheckSquare color="green" className="me-2" />
+                  ) : (
+                    <FaBan color="red" className="me-2" />
+                  )}
+                  <Dropdown align="end">
+                    <Dropdown.Toggle as={CustomToggle} />
+                    <Dropdown.Menu>
+                      <Dropdown.Item
+                        onClick={() =>
+                          navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`)
+                        }
+                      >
+                        <FaEdit className="me-2" /> Edit
+                      </Dropdown.Item>
+                      <Dropdown.Item onClick={() => handlePublish(quiz)}>
+                        <FaCheck className="me-2" />
+                        {quiz.published ? "Unpublish" : "Publish"}
+                      </Dropdown.Item>
+                      <Dropdown.Divider />
+                      <Dropdown.Item
+                        className="text-danger"
+                        onClick={() => handleDelete(quiz._id)}
+                      >
+                        <FaTrash className="me-2" /> Delete
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
               )}
             </ListGroup.Item>
           ))}

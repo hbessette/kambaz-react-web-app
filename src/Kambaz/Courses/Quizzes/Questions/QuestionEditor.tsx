@@ -46,7 +46,7 @@ export default function QuestionEditor({
       points: 1,
       questionType: "Multiple Choice",
       choices: [],
-      answers: [],
+      correctAnswers: [],
       correctAnswer: "",
       editing: true,
     };
@@ -76,7 +76,7 @@ export default function QuestionEditor({
         ...question,
         questionType: type,
         choices: type === "Multiple Choice" ? [] : null,
-        answers: type === "Fill in the Blank" ? [] : null,
+        correctAnswers: type === "Fill in the Blank" ? [] : null,
         correctAnswer: type === "Multiple Choice" ? "" : null,
       })
     );
@@ -129,11 +129,11 @@ export default function QuestionEditor({
     value: string,
     question: any
   ) => {
-    const newAnswers = [...(question.answers || [])];
+    const newAnswers = [...(question.correctAnswers || [])];
     newAnswers[index] = value;
     const updatedQuestion = {
       ...question,
-      answers: newAnswers,
+      correctAnswers: newAnswers,
     };
     dispatch(updateQuestion(updatedQuestion));
   };
@@ -141,17 +141,17 @@ export default function QuestionEditor({
   const handleAddFillInBlankAnswer = (question: any) => {
     const updatedQuestion = {
       ...question,
-      answers: [...(question.answers || []), ""],
+      correctAnswers: [...(question.correctAnswers || []), ""],
     };
     dispatch(updateQuestion(updatedQuestion));
   };
 
   const handleDeleteFillInBlankAnswer = (index: number, question: any) => {
-    const newAnswers = [...(question.answers || [])];
+    const newAnswers = [...(question.correctAnswers || [])];
     newAnswers.splice(index, 1);
     const updatedQuestion = {
       ...question,
-      answers: newAnswers,
+      correctAnswers: newAnswers,
     };
     dispatch(updateQuestion(updatedQuestion));
   };
@@ -177,7 +177,11 @@ export default function QuestionEditor({
   return (
     <div>
       <div className="text-center mb-3">
-        <Button variant="light" className="border" onClick={() => handleNewQuestion()}>
+        <Button
+          variant="light"
+          className="border"
+          onClick={() => handleNewQuestion()}
+        >
           + New Question
         </Button>
       </div>
@@ -291,7 +295,7 @@ export default function QuestionEditor({
 
               {question.questionType === "Fill in the Blank" && (
                 <>
-                  {question.answers?.map((ans: string, idx: number) => (
+                  {question.correctAnswers?.map((ans: string, idx: number) => (
                     <InputGroup className="mb-2" key={idx}>
                       <Form.Control
                         placeholder={`Correct answer ${idx + 1}`}
@@ -309,7 +313,7 @@ export default function QuestionEditor({
                         onClick={() =>
                           handleDeleteFillInBlankAnswer(idx, question)
                         }
-                        disabled={question.answers.length <= 1}
+                        disabled={question.correctAnswers.length <= 1}
                       >
                         ×
                       </Button>
