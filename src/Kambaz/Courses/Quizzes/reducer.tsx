@@ -22,6 +22,7 @@ const quizzesSlice = createSlice({
         assignmentGroup: quiz.assignmentGroup,
         shuffleAnswers: quiz.shuffleAnswers,
         timeLimit: quiz.timeLimit,
+        timeLimitAmount: quiz.timeLimitAmount,
         multipleAttempts: quiz.multipleAttempts,
         howManyAttempts: quiz.howManyAttempts,
         showCorrectAnswers: quiz.showCorrectAnswers,
@@ -45,7 +46,7 @@ const quizzesSlice = createSlice({
     },
     editQuiz: (state, { payload: quizId }) => {
       state.quizzes = state.quizzes.map((q: any) =>
-        q._id === quizId ? { ...q, editing: true } : m
+        q._id === quizId ? { ...q, editing: true } : q
       ) as any;
     },
   },

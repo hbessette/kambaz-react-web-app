@@ -89,3 +89,18 @@ export const findEnrollments = async () => {
     )
     return data;
 }
+
+export const findQuizAttemptsForUser = async (userId: string, quizId: string) => {
+  const { data } = await axiosWithCredentials.get(
+    `${USERS_API}/${userId}/quiz/${quizId}`
+  )
+  return data;
+}
+
+export const createQuizAttempt = async (userId: string, quizId: string, quizAttempt: any) => {
+  const { data } = await axiosWithCredentials.post(
+    `${USERS_API}/${userId}/quiz/${quizId}`,
+    quizAttempt
+  )
+  return data;
+}

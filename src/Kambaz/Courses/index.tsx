@@ -17,24 +17,27 @@ import * as coursesClient from "./client";
 import { useEffect, useState } from "react";
 import Quizzes from "./Quizzes";
 import QuizEditor from "./Quizzes/QuizEditor";
+import QuizDetails from "./Quizzes/QuizDetails";
+import QuizTaker from "./Quizzes/QuizTaker";
+
 export default function Courses() {
   const { cid } = useParams();
   const { pathname } = useLocation();
   const course = useSelector((state: any) =>
     state.coursesReducer.courses.find((course: any) => course._id === cid)
   );
-  const [users, setUsers] = useState < any[] >([])
+  const [users, setUsers] = useState<any[]>([]);
   const fetchUsers = async () => {
     try {
-      const users = await coursesClient.findUsersForCourse(cid as string)
-      setUsers(users)
+      const users = await coursesClient.findUsersForCourse(cid as string);
+      setUsers(users);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUsers()
+    fetchUsers();
   }, []);
   return (
     <div id="wd-courses">
@@ -56,7 +59,9 @@ export default function Courses() {
             <Route path="/Assignments/:aid" element={<AssignmentEditor />} />
             <Route path="/People" element={<PeopleTable users={users} />} />
             <Route path="/Quizzes" element={<Quizzes />} />
-            <Route path="/Quizzes/:qid" element={<QuizEditor/>} />
+            <Route path="/Quizzes/:qid" element={<QuizEditor />} />
+            <Route path="/Quizzes/:qid/Details" element={<QuizDetails />} />
+            <Route path="/Quizzes/:qid/Take" element={<QuizTaker />} />
           </Routes>
         </div>
       </div>
